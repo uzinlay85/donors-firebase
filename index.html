@@ -56,35 +56,23 @@
     <div id="donor-list-modal" class="modal-backdrop"><div class="modal-content"><h3 id="donor-list-title">အလှူရှင်များ စာရင်း</h3><div id="donor-list-content"></div><div class="modal-actions"><button class="cancel-btn">ပိတ်မည်</button></div></div></div>
     <div id="search-results-modal" class="modal-backdrop"><div class="modal-content"><h3>အလှူရှင် ရှာဖွေရန်</h3><form id="search-form"><input type="search" id="search-input" placeholder="အမည်ဖြင့် ရှာရန်..."><button type="submit" class="action-btn"><i class="fa-solid fa-search"></i></button></form><div id="search-results-content"></div><div class="modal-actions"><button class="cancel-btn">ပိတ်မည်</button></div></div></div>
 
-    <!-- Firebase SDK - Corrected Version -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-    // ### STEP 1: PASTE YOUR FIREBASE CONFIG HERE ###
-    // ဤနေရာတွင် သင်၏ Firebase Project မှရသော config code ကို ကူးထည့်ပါ
-   // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCv8Q-q7H1O7BhEZVX8AVfFO_Fj2jsD0HE",
+        authDomain: "nd-donors.firebaseapp.com",
+        projectId: "nd-donors",
+        storageBucket: "nd-donors.firebasestorage.app",
+        messagingSenderId: "41926036098",
+        appId: "1:41926036098:web:1282ab75b6241a10d8c29b"
+    };
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCv8Q-q7H1O7BhEZVX8AVfFO_Fj2jsD0HE",
-  authDomain: "nd-donors.firebaseapp.com",
-  projectId: "nd-donors",
-  storageBucket: "nd-donors.firebasestorage.app",
-  messagingSenderId: "41926036098",
-  appId: "1:41926036098:web:1282ab75b6241a10d8c29b"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-    // Initialize Firebase
-    // This script uses the global 'firebase' object provided by the SDKs above.
-    // It does NOT use 'import', so it will work correctly.
+    // Initialize Firebase using the global 'firebase' object
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
@@ -124,7 +112,7 @@ const app = initializeApp(firebaseConfig);
                 auth.onAuthStateChanged(user => {
                     this.isLoggedIn = !!user;
                     this.updateUIForLoginState();
-                    this.renderCalendar(); // Re-render calendar to apply admin styles
+                    this.renderCalendar();
                 });
             },
 
@@ -139,7 +127,7 @@ const app = initializeApp(firebaseConfig);
                     this.elements.loadingOverlay.style.display = 'none';
                 }, error => {
                     console.error("Error listening for donations: ", error);
-                    alert("Database နှင့် ချိတ်ဆက်၍မရပါ၊ Firebase config ကို စစ်ဆေးပါ။");
+                    alert("Database နှင့် ချိတ်ဆက်၍မရပါ၊ သင်၏ Firebase Config မှန်ကန်မှုရှိမရှိ စစ်ဆေးပါ။");
                     this.elements.loadingOverlay.style.display = 'none';
                 });
             },
