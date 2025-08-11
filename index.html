@@ -6,11 +6,9 @@
     <title>ပါဠိတက္ကသိုလ်ညောင်တုန်းကျောင်းတိုက် - ဆွမ်းအလှူရှင်စာရင်း</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        /* Font ကို Padauk မှ Pyidaungsu သို့ ပြောင်းလဲထားပါသည် */
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         :root{--primary-color:#6a5acd;--secondary-color:#8a7dcf;--light-gray:#f8f9fa;--dark-gray:#4a5568;--morning-color:#d4a15b;--day-color:#4caf50;--danger-color:#e53e3e;--success-color:#28a745}*,*::before,*::after{box-sizing:border-box}
         body{
-            /* Font Family ကို Pyidaungsu သို့ ပြောင်းလဲထားပါသည် */
             font-family:'Pyidaungsu', sans-serif;
             background:linear-gradient(to bottom right,var(--primary-color),var(--secondary-color));color:#333;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;margin:0;padding:10px
         }
@@ -328,18 +326,29 @@
                 const year = this.viewDate.getFullYear();
                 const month = this.viewDate.getMonth();
                 els.monthYearHeader.textContent = `${this.viewDate.toLocaleString('my-MM', { month: 'long' })} ${year}`;
+                
                 const firstDayOfMonth = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const today = new Date();
 
                 const isMobile = window.innerWidth <= 600;
+                // Start week on Monday
                 const dayHeaders = isMobile 
-                    ? ['နွေ', 'လာ', 'င်္ဂါ', 'ဟူး', 'တေး', 'ကြာ', 'နေ']
-                    : ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ'];
+                    ? ['လာ', 'င်္ဂါ', 'ဟူး', 'တေး', 'ကြာ', 'နေ', 'နွေ']
+                    : ['တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ', 'တနင်္ဂနွေ'];
 
                 dayHeaders.forEach(day=>{const cell=document.createElement("div");cell.className="calendar-cell day-header";cell.textContent=day;els.calendarGrid.appendChild(cell)});
-                for(let i=0;i<firstDayOfMonth;i++){const cell=document.createElement("div");cell.className="calendar-cell other-month";els.calendarGrid.appendChild(cell)}
-                for(let day=1;day<=daysInMonth;day++){
+                
+                // Adjust for Monday start. 0=Sun, 1=Mon...
+                let paddingDays = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
+
+                for(let i=0; i < paddingDays; i++){
+                    const cell=document.createElement("div");
+                    cell.className="calendar-cell other-month";
+                    els.calendarGrid.appendChild(cell);
+                }
+
+                for(let day=1; day<=daysInMonth; day++){
                     const cell = this.createDayCell(day, month, year, today);
                     els.calendarGrid.appendChild(cell);
                 }
