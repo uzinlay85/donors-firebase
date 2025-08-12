@@ -12,7 +12,14 @@
             font-family:'Pyidaungsu', sans-serif;
             background:linear-gradient(to bottom right,var(--primary-color),var(--secondary-color));color:#333;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;margin:0;padding:10px
         }
-        .container{background-color:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);width:100%;max-width:900px;padding:24px}header{text-align:center;margin-bottom:24px}header h1{font-size:clamp(18px, 4vw, 24px);margin-bottom:8px;display:flex;justify-content:center;align-items:center;gap:15px}header p{font-size:14px;color:#666;margin-top:0}.donors-section h2{font-size:18px;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:8px}.donor-cards{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}.donor-card{background-color:var(--light-gray);border-radius:12px;padding:16px;flex:1 1 200px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s ease-in-out}.donor-card:hover{background-color:#e9ecef;transform:translateY(-3px);box-shadow:0 4px 10px rgba(0,0,0,.05)}.donor-card .icon{font-size:24px}.donor-card .icon.coffee{color:var(--morning-color)}.donor-card .icon.utensils{color:var(--day-color)}.donor-card-info h3{margin:0;font-size:16px}.donor-card-info p{margin:0;font-size:14px;color:#555}.no-donations{color:#777;font-style:italic;text-align:center;padding:10px;background:#fafafa;border-radius:8px}
+        input, button, select, textarea, .donor-entry {
+            font-family: 'Pyidaungsu', sans-serif;
+        }
+        .container{background-color:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);width:100%;max-width:900px;padding:24px}header{text-align:center;margin-bottom:24px}header h1{font-size:clamp(18px, 4vw, 24px);margin-bottom:8px;display:flex;justify-content:center;align-items:center;gap:15px}header p{font-size:14px;color:#666;margin-top:0}
+        .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:8px}
+        .section-header h2{font-size:18px;margin:0}
+        #new-donors-today{font-size:14px;color:var(--primary-color);font-weight:700;background-color:#f0eaff;padding:4px 10px;border-radius:8px}
+        .donor-cards{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}.donor-card{background-color:var(--light-gray);border-radius:12px;padding:16px;flex:1 1 200px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s ease-in-out}.donor-card:hover{background-color:#e9ecef;transform:translateY(-3px);box-shadow:0 4px 10px rgba(0,0,0,.05)}.donor-card .icon{font-size:24px}.donor-card .icon.coffee{color:var(--morning-color)}.donor-card .icon.utensils{color:var(--day-color)}.donor-card-info h3{margin:0;font-size:16px}.donor-card-info p{margin:0;font-size:14px;color:#555}.no-donations{color:#777;font-style:italic;text-align:center;padding:10px;background:#fafafa;border-radius:8px}
         .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
         .calendar-header h2{font-size:clamp(16px, 5vw, 20px);margin:0;color:var(--primary-color);font-weight:700;text-align:center;flex-grow:1}
         .calendar-nav-right{display:flex;align-items:center;}
@@ -24,6 +31,7 @@
             .container { padding: 15px; }
             header h1 { font-size: 14px; gap: 8px; }
             header p { font-size: 12px; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
             .calendar-cell { min-height: 80px; padding: 4px; font-size: 12px; }
             .day-header { font-size: 12px; padding: 8px 2px; }
             .day-number { font-size: 12px; }
@@ -48,7 +56,10 @@
 
         <main>
             <section class="donors-section">
-                <h2>ယခုလ အလှူရှင် အကျဉ်းချုပ်</h2>
+                <div class="section-header">
+                    <h2>ယခုလ အလှူရှင် အကျဉ်းချုပ်</h2>
+                    <div id="new-donors-today">အသစ်ထည့်ထားသော အလှူရှင် - (၀)</div>
+                </div>
                 <div class="donor-cards">
                     <div id="morning-donor-card" class="donor-card"><div class="icon coffee"><i class="fa-solid fa-mug-saucer"></i></div><div class="donor-card-info"><h3>အရုဏ်ဆွမ်း</h3><p id="morning-donations-count">အလှူရှင် ၀ ဦး</p></div></div>
                     <div id="day-donor-card" class="donor-card"><div class="icon utensils"><i class="fa-solid fa-utensils"></i></div><div class="donor-card-info"><h3>နေ့ဆွမ်း</h3><p id="day-donations-count">အလှူရှင် ၀ ဦး</p></div></div>
@@ -95,7 +106,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
+    
     <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCv8Q-q7H1O7BhEZVX8AVfFO_Fj2jsD0HE",
@@ -131,6 +142,7 @@
                 importBtn: document.getElementById('import-btn'),
                 importFileInput: document.getElementById('import-file-input'),
                 clearDataBtn: document.getElementById('clear-data-btn'),
+                newDonorsToday: document.getElementById('new-donors-today'),
                 modals: document.querySelectorAll('.modal-backdrop'),
                 loginModal: document.getElementById('login-modal'),
                 loginForm: document.getElementById('login-form'),
@@ -320,6 +332,11 @@
                     });
             },
 
+            toMyanmarNumerals(numStr) {
+                const myanmarDigits = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+                return numStr.toString().split('').map(digit => myanmarDigits[parseInt(digit)]).join('');
+            },
+
             renderCalendar() {
                 const els = this.elements;
                 els.calendarGrid.innerHTML = '';
@@ -332,14 +349,12 @@
                 const today = new Date();
 
                 const isMobile = window.innerWidth <= 600;
-                // Start week on Monday
                 const dayHeaders = isMobile 
                     ? ['လာ', 'င်္ဂါ', 'ဟူး', 'တေး', 'ကြာ', 'နေ', 'နွေ']
                     : ['တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ', 'တနင်္ဂနွေ'];
 
                 dayHeaders.forEach(day=>{const cell=document.createElement("div");cell.className="calendar-cell day-header";cell.textContent=day;els.calendarGrid.appendChild(cell)});
                 
-                // Adjust for Monday start. 0=Sun, 1=Mon...
                 let paddingDays = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
 
                 for(let i=0; i < paddingDays; i++){
@@ -353,6 +368,7 @@
                     els.calendarGrid.appendChild(cell);
                 }
                 this.updateDonationSummary();
+                this.updateTodaysDonorCount();
             },
             
             createDayCell(day, month, year, today) {
@@ -405,9 +421,21 @@
                         if (this.donations[key].day) dayCount++;
                     }
                 }
-                document.getElementById('morning-donations-count').textContent = `အလှူရှင် ${morningCount} ဦး`;
-                document.getElementById('day-donations-count').textContent = `အလှူရှင် ${dayCount} ဦး`;
+                document.getElementById('morning-donations-count').textContent = `အလှူရှင် ${this.toMyanmarNumerals(morningCount)} ဦး`;
+                document.getElementById('day-donations-count').textContent = `အလှူရှင် ${this.toMyanmarNumerals(dayCount)} ဦး`;
                 document.querySelector('.no-donations').style.display = (morningCount + dayCount > 0) ? 'none' : 'block';
+            },
+
+            updateTodaysDonorCount() {
+                const today = new Date();
+                const dateKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+                let count = 0;
+                if (this.donations[dateKey]) {
+                    if (this.donations[dateKey].morning) count++;
+                    if (this.donations[dateKey].day) count++;
+                }
+                const countText = this.toMyanmarNumerals(count.toString());
+                this.elements.newDonorsToday.innerHTML = `အသစ်ထည့်ထားသော အလှူရှင် - (${countText})`;
             },
 
             handleCellClick(e) {
