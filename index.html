@@ -15,10 +15,9 @@
         input, button, select, textarea, .donor-entry {
             font-family: 'Pyidaungsu', sans-serif;
         }
-        .container{background-color:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);width:100%;max-width:900px;padding:24px}header{text-align:center;margin-bottom:24px}header h1{font-size:clamp(18px, 4vw, 24px);margin-bottom:8px;display:flex;justify-content:center;align-items:center;gap:15px}header p{font-size:14px;color:#666;margin-top:0}
-        .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:8px}
-        .section-header h2{font-size:18px;margin:0}
-        #new-donors-today{font-size:14px;color:var(--primary-color);font-weight:700;background-color:#f0eaff;padding:4px 10px;border-radius:8px}
+        .container{background-color:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);width:100%;max-width:900px;padding:24px}header{text-align:center;margin-bottom:24px}header h1{font-size:clamp(18px, 4vw, 24px);margin-bottom:8px;display:flex;justify-content:center;align-items:center;gap:15px}header p{font-size:14px;color:#666;margin-top:0}.donors-section h2{font-size:18px;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:8px}
+        .summary-counts{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;background-color:var(--light-gray);padding:10px;border-radius:8px;margin-bottom:16px}
+        .summary-counts div{font-size:14px;font-weight:700;color:var(--dark-gray)}
         .donor-cards{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}.donor-card{background-color:var(--light-gray);border-radius:12px;padding:16px;flex:1 1 200px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s ease-in-out}.donor-card:hover{background-color:#e9ecef;transform:translateY(-3px);box-shadow:0 4px 10px rgba(0,0,0,.05)}.donor-card .icon{font-size:24px}.donor-card .icon.coffee{color:var(--morning-color)}.donor-card .icon.utensils{color:var(--day-color)}.donor-card-info h3{margin:0;font-size:16px}.donor-card-info p{margin:0;font-size:14px;color:#555}.no-donations{color:#777;font-style:italic;text-align:center;padding:10px;background:#fafafa;border-radius:8px}
         .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
         .calendar-header h2{font-size:clamp(16px, 5vw, 20px);margin:0;color:var(--primary-color);font-weight:700;text-align:center;flex-grow:1}
@@ -31,7 +30,7 @@
             .container { padding: 15px; }
             header h1 { font-size: 14px; gap: 8px; }
             header p { font-size: 12px; }
-            .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .summary-counts { flex-direction: column; align-items: flex-start; }
             .calendar-cell { min-height: 80px; padding: 4px; font-size: 12px; }
             .day-header { font-size: 12px; padding: 8px 2px; }
             .day-number { font-size: 12px; }
@@ -56,9 +55,10 @@
 
         <main>
             <section class="donors-section">
-                <div class="section-header">
-                    <h2>ယခုလ အလှူရှင် အကျဉ်းချုပ်</h2>
-                    <div id="new-donors-today">အသစ်ထည့်ထားသော အလှူရှင် - (၀)</div>
+                <h2>ယခုလ အလှူရှင် အကျဉ်းချုပ်</h2>
+                <div class="summary-counts">
+                    <div id="total-donors-all">စာရင်းရှိအလှူရှင် (စုစုပေါင်း) - (၀)</div>
+                    <div id="new-donors-today">ယနေ့စာရင်းသွင်း အလှူရှင် - (၀)</div>
                 </div>
                 <div class="donor-cards">
                     <div id="morning-donor-card" class="donor-card"><div class="icon coffee"><i class="fa-solid fa-mug-saucer"></i></div><div class="donor-card-info"><h3>အရုဏ်ဆွမ်း</h3><p id="morning-donations-count">အလှူရှင် ၀ ဦး</p></div></div>
@@ -143,6 +143,7 @@
                 importFileInput: document.getElementById('import-file-input'),
                 clearDataBtn: document.getElementById('clear-data-btn'),
                 newDonorsToday: document.getElementById('new-donors-today'),
+                totalDonorsAll: document.getElementById('total-donors-all'),
                 modals: document.querySelectorAll('.modal-backdrop'),
                 loginModal: document.getElementById('login-modal'),
                 loginForm: document.getElementById('login-form'),
@@ -412,30 +413,48 @@
             updateDonationSummary() {
                 let morningCount = 0;
                 let dayCount = 0;
-                const currentMonth = this.viewDate.getMonth();
-                const currentYear = this.viewDate.getFullYear();
+                let totalDonorsInDb = 0;
+
                 for (const key in this.donations) {
+                    if (this.donations[key].morning) totalDonorsInDb++;
+                    if (this.donations[key].day) totalDonorsInDb++;
+                    
                     const [year, month] = key.split('-').map(Number);
-                    if (year === currentYear && month === currentMonth) {
+                    if (year === this.viewDate.getFullYear() && month === this.viewDate.getMonth()) {
                         if (this.donations[key].morning) morningCount++;
                         if (this.donations[key].day) dayCount++;
                     }
                 }
+                
                 document.getElementById('morning-donations-count').textContent = `အလှူရှင် ${this.toMyanmarNumerals(morningCount)} ဦး`;
                 document.getElementById('day-donations-count').textContent = `အလှူရှင် ${this.toMyanmarNumerals(dayCount)} ဦး`;
-                document.querySelector('.no-donations').style.display = (morningCount + dayCount > 0) ? 'none' : 'block';
+                this.elements.totalDonorsAll.textContent = `စာရင်းရှိအလှူရှင် (စုစုပေါင်း) - (${this.toMyanmarNumerals(totalDonorsInDb)})`;
+                document.querySelector('.no-donations').style.display = ((morningCount + dayCount) > 0) ? 'none' : 'block';
             },
 
             updateTodaysDonorCount() {
                 const today = new Date();
-                const dateKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+                const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Today at 00:00
+                const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1); // Tomorrow at 00:00
+
                 let count = 0;
-                if (this.donations[dateKey]) {
-                    if (this.donations[dateKey].morning) count++;
-                    if (this.donations[dateKey].day) count++;
+                for (const key in this.donations) {
+                    const donation = this.donations[key];
+                    if (donation.morning && donation.morning.createdAt) {
+                        const createdAtDate = donation.morning.createdAt.toDate();
+                        if (createdAtDate >= todayStart && createdAtDate < todayEnd) {
+                            count++;
+                        }
+                    }
+                    if (donation.day && donation.day.createdAt) {
+                        const createdAtDate = donation.day.createdAt.toDate();
+                        if (createdAtDate >= todayStart && createdAtDate < todayEnd) {
+                            count++;
+                        }
+                    }
                 }
                 const countText = this.toMyanmarNumerals(count.toString());
-                this.elements.newDonorsToday.innerHTML = `အသစ်ထည့်ထားသော အလှူရှင် - (${countText})`;
+                this.elements.newDonorsToday.innerHTML = `ယနေ့စာရင်းသွင်း အလှူရှင် - (${countText})`;
             },
 
             handleCellClick(e) {
@@ -474,6 +493,12 @@
                     address: donorForm['donor-address'].value.trim(),
                     phone: donorForm['donor-phone'].value.trim(),
                 };
+
+                // Check if it is a new entry to add the timestamp
+                const isNewEntry = !(this.donations[dateKey] && this.donations[dateKey][type]);
+                if (isNewEntry) {
+                    donorData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                }
 
                 const docRef = db.collection('donations').doc(dateKey);
                 docRef.set({ [type]: donorData }, { merge: true })
