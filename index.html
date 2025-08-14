@@ -17,7 +17,9 @@
         }
         .container{background-color:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);width:100%;max-width:900px;padding:24px}header{text-align:center;margin-bottom:24px}header h1{font-size:clamp(18px, 4vw, 24px);margin-bottom:8px;display:flex;justify-content:center;align-items:center;gap:15px}header p{font-size:14px;color:#666;margin-top:0}.donors-section h2{font-size:18px;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:8px}
         .summary-counts{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;background-color:var(--light-gray);padding:10px;border-radius:8px;margin-bottom:24px}
-        .summary-counts div{font-size:14px;font-weight:700;color:var(--dark-gray)}
+        .summary-counts div{font-size:14px;font-weight:700;color:var(--dark-gray); padding: 4px 8px; border-radius: 6px;}
+        #new-donors-today { cursor: pointer; transition: background-color 0.2s; }
+        #new-donors-today:hover { background-color: #e0d8ff; }
         .donor-cards{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}.donor-card{background-color:var(--light-gray);border-radius:12px;padding:16px;flex:1 1 200px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s ease-in-out}.donor-card:hover{background-color:#e9ecef;transform:translateY(-3px);box-shadow:0 4px 10px rgba(0,0,0,.05)}.donor-card .icon{font-size:24px}.donor-card .icon.coffee{color:var(--morning-color)}.donor-card .icon.utensils{color:var(--day-color)}.donor-card-info h3{margin:0;font-size:16px}.donor-card-info p{margin:0;font-size:14px;color:#555}.no-donations{color:#777;font-style:italic;text-align:center;padding:10px;background:#fafafa;border-radius:8px}
         .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
         .calendar-header h2{font-size:clamp(16px, 5vw, 20px);margin:0;color:var(--primary-color);font-weight:700;text-align:center;flex-grow:1}
@@ -215,6 +217,7 @@
                 els.importBtn.addEventListener('click', () => els.importFileInput.click());
                 els.importFileInput.addEventListener('change', (e) => this.importData(e));
                 els.clearDataBtn.addEventListener('click', () => this.clearAllData());
+                els.newDonorsToday.addEventListener('click', () => this.showTodaysDonorListModal());
             },
             
             goToToday() {
@@ -527,6 +530,54 @@
                 if (donorList.length > 0) {
                     listHtml = `<table class="results-table"><thead><tr><th>ရက်စွဲ</th><th>အလှူရှင်အမည်</th></tr></thead><tbody>${donorList.map(d => `<tr><td>${d.date} ရက်</td><td>${d.name}</td></tr>`).join('')}</tbody></table>`;
                 }
+                document.getElementById('donor-list-content').innerHTML = listHtml;
+                this.openModal('donor-list-modal');
+            },
+            
+            showTodaysDonorListModal() {
+                const title = `ယနေ့ စာရင်းသွင်းထားသော အလှူရှင်များ`;
+                document.getElementById('donor-list-title').textContent = title;
+
+                const todaysDonors = [];
+                const today = new Date();
+                const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+                const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+
+                for (const key in this.donations) {
+                    const donationData = this.donations[key];
+                    const [year, month, day] = key.split('-').map(Number);
+                    const donationForDate = `${day}-${parseInt(month) + 1}-${year}`;
+
+                    ['morning', 'day'].forEach(type => {
+                        if (donationData[type] && donationData[type].createdAt) {
+                            const createdAtDate = donationData[type].createdAt.toDate();
+                            if (createdAtDate.getTime() >= todayStart && createdAtDate.getTime() < todayEnd) {
+                                todaysDonors.push({
+                                    name: donationData[type].name,
+                                    type: type === 'morning' ? 'အရုဏ်ဆွမ်း' : 'နေ့ဆွမ်း',
+                                    donationDate: donationForDate
+                                });
+                            }
+                        }
+                    });
+                }
+
+                let listHtml = `<p>ယနေ့အတွက် စာရင်းသွင်းထားသော အလှူရှင် မရှိသေးပါ။</p>`;
+                if (todaysDonors.length > 0) {
+                    listHtml = `<table class="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>အလှူရှင်အမည်</th>
+                                            <th>အလှူအမျိုးအစား</th>
+                                            <th>လှူဒါန်းသည့်ရက်</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${todaysDonors.map(d => `<tr><td>${d.name}</td><td>${d.type}</td><td>${d.donationDate}</td></tr>`).join('')}
+                                    </tbody>
+                                </table>`;
+                }
+
                 document.getElementById('donor-list-content').innerHTML = listHtml;
                 this.openModal('donor-list-modal');
             },
